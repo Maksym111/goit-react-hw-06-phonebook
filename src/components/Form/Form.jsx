@@ -1,28 +1,27 @@
-import { useState } from 'react';
 import { BtnAdd, Form, Input, Title } from './Form.styled';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from 'redux/contactsSlice';
+import { getContacts } from 'redux/selectors';
 
-const PhoneBookForm = ({ onSubmitForm }) => {
-  const [contactName, setContactName] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-
-  const handleInput = e => {
-    const { name, value } = e.target;
-
-    if (name === 'name') {
-      setContactName(value);
-    } else if (name === 'number') {
-      setContactNumber(value);
-    }
-  };
+const PhoneBookForm = () => {
+  const contacts = useSelector(getContacts);
+  const dispatch = useDispatch();
 
   const addNewName = e => {
     e.preventDefault();
     const { name, number } = e.target.elements;
 
-    onSubmitForm(contactName, contactNumber);
+    const checkedName = contacts.find(elem => {
+      return elem.name === name.value;
+    });
 
-    setContactName('');
-    setContactNumber('');
+    if (checkedName) {
+      alert(`${name.value} is already in contacts.`);
+      return;
+    }
+
+    dispatch(addContact(name.value, number.value));
+
     name.value = '';
     number.value = '';
   };
@@ -36,7 +35,6 @@ const PhoneBookForm = ({ onSubmitForm }) => {
         pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
         title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
         required
-        onChange={handleInput}
       />
 
       <Title>Number</Title>
@@ -46,7 +44,6 @@ const PhoneBookForm = ({ onSubmitForm }) => {
         pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
         title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
         required
-        onChange={handleInput}
       />
 
       <BtnAdd type="submit">Add contact</BtnAdd>
